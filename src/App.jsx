@@ -53,7 +53,7 @@ const App = () => {
         </div>
       )}
 
-      {loading && <Loading />}
+      {/* {loading && <Loading />} */}
 
       {offline && (
         <Error
@@ -63,13 +63,13 @@ const App = () => {
       )}
 
       <Routes>
-        <Route element={<ProtectedRoute offline={offline} authed={true} />}>
+        <Route>
           <Route exact path="/" element={<Main />} />
           <Route path="/chat" element={<Main />} />
           <Route path="/chat/:id" element={<Main />} />
         </Route>
 
-        <Route element={<ProtectedRoute offline={offline} />}>
+        <Route>
           <Route path="/login" element={<Login />} />
           <Route path="/login/auth" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

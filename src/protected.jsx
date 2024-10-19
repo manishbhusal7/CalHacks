@@ -14,43 +14,43 @@ const ProtectedRoute = ({ offline, authed }) => {
   const dispatch = useDispatch();
 
   useLayoutEffect(() => {
-    dispatch(setLoading(true));
+    dispatch(setLoading(false));
     const getResponse = async () => {
       let res = null;
 
-      try {
-        res = await instance.get("/api/user/checkLogged");
-        if (res?.data?.data) {
-          dispatch(insertUser(res?.data?.data));
-        }
-      } catch (err) {
-        console.log(err);
+      // try {
+      //   res = await instance.get("/api/user/checkLogged");
+      //   if (res?.data?.data) {
+      //     dispatch(insertUser(res?.data?.data));
+      //   }
+      // } catch (err) {
+      //   console.log(err);
 
-        if (err?.response?.data?.status === 405) {
-          dispatch(emptyUser());
-          dispatch(emptyAllRes());
-          if (authed) {
-            navigate("/login");
-          } else {
-            setComponent(<Outlet />);
-          }
-        } else if (err?.code !== "ERR_NETWORK") {
-          navigate("/something-went-wrong");
-        }
-      } finally {
-        if (res?.data?.status === 208) {
-          if (!authed) {
-            navigate("/");
-          } else {
-            setComponent(<Outlet />);
-          }
-        }
-      }
+      //   if (err?.response?.data?.status === 405) {
+      //     dispatch(emptyUser());
+      //     dispatch(emptyAllRes());
+      //     if (authed) {
+      //       navigate("/login");
+      //     } else {
+      //       setComponent(<Outlet />);
+      //     }
+      //   } else if (err?.code !== "ERR_NETWORK") {
+      //     navigate("/something-went-wrong");
+      //   }
+      // } finally {
+      //   if (res?.data?.status === 208) {
+      //     if (!authed) {
+      //       navigate("/");
+      //     } else {
+      //       setComponent(<Outlet />);
+      //     }
+      //   }
+      // }
     };
 
-    if (!offline) {
-      getResponse();
-    }
+    // if (!offline) {
+    //   getResponse();
+    // }
   }, [location]);
 
   return component;
