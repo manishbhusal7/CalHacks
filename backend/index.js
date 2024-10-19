@@ -1,60 +1,52 @@
-// index.js
+import express from 'express';
+import multer from 'multer';
+import cors from 'cors';
+import fs from 'fs';
+import { Groq } from 'groq-sdk';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-import express from "express";
-import cors from "cors";
-import multer from "multer";
-import dotenv from "dotenv";
-import { createClient } from "@deepgram/sdk";
-
-
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 5000;
+const upload = multer({ dest: 'uploads/' });
+const GROQ_API_KEY="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";
+const groq = new Groq({
+  apiKey: GROQ_API_KEY, // Make sure to set this environment variable
+});
 
-// Middleware
 app.use(cors());
 
-// Set up multer for file uploads
-const upload = multer({
-    limits: { fileSize: 10 * 1024 * 1024 }, // Set a 10 MB limit (adjust as needed)
+app.post('/upload', upload.single('audio'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  try {
+    // Rename the file to have .mp3 extension
+    const newPath = `${req.file.path}.mp3`;
+    fs.renameSync(req.file.path, newPath);
+
+    // Create a translation job
+    const translation = await groq.audio.translations.create({
+      file: fs.createReadStream(newPath),
+      model: "whisper-large-v3",
+      response_format: "json",
+      temperature: 0.0,
+    });
+
+    // Delete the file after processing
+    fs.unlinkSync(newPath);
+
+    res.json({ transcription: translation.text });
+  } catch (error) {
+    console.error('Error processing audio:', error);
+    res.status(500).send('Error processing audio');
+  }
 });
 
-// Initialize the Deepgram client
-const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
-
-// Endpoint to transcribe audio file
-app.post('/api/transcribe', upload.single('file'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    // Create a buffer from the uploaded file
-    const audioBuffer = req.file.buffer;
-
-    try {
-        // Call the Deepgram transcription API
-        const { result, error } =  await deepgram.listen.prerecorded.transcribeFile(
-          audioBuffer,
-            {
-                model: 'nova-2', // Specify the model to use
-            }
-        );
-
-        // Check for errors
-        if (error) {
-            throw error;
-        }
-
-        // Return the transcription result
-        res.json({ transcription: result });
-    } catch (error) {
-        console.error('Error during transcription:', error);
-        res.status(500).json({ error: 'Transcription failed', details: error });
-    }
-});
-
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
