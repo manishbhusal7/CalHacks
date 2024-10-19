@@ -1,43 +1,60 @@
-import Groq from "groq-sdk";
-import cors from 'cors';
-import express from 'express';
+// index.js
 
-const GROQ_API_KEY = "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"
+import express from "express";
+import cors from "cors";
+import multer from "multer";
+import dotenv from "dotenv";
+import { createClient } from "@deepgram/sdk";
 
-const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-export async function getGroqChatCompletion(messages, model) {  
-  return groq.chat.completions.create({ 
-    messages: [
-      {
-        role: "user",
-        content: "Explain the importance of fast language models",
-      },
-    ],
-    model: "llama3-8b-8192",
-  });
-}
+dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 5000;
+
+// Middleware
 app.use(cors());
-const port = 3000;
 
-app.use(express.json());
-
-app.post('/chat', async (req, res) => {
-  try {
-    const { messages, model } = req.body;
-    const completion = await getGroqChatCompletion(messages, model);
-      // Print the completion returned by the LLM.
-    console.log(`Received request: ${JSON.stringify(req.body)}`);
-    // console.log(`Returning completion: ${JSON.stringify(completion)}`);
-    res.json(completion);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-    console.error(error);
-  }
+// Set up multer for file uploads
+const upload = multer({
+    limits: { fileSize: 10 * 1024 * 1024 }, // Set a 10 MB limit (adjust as needed)
 });
 
+// Initialize the Deepgram client
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
+
+// Endpoint to transcribe audio file
+app.post('/api/transcribe', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Create a buffer from the uploaded file
+    const audioBuffer = req.file.buffer;
+
+    try {
+        // Call the Deepgram transcription API
+        const { result, error } =  await deepgram.listen.prerecorded.transcribeFile(
+          audioBuffer,
+            {
+                model: 'nova-2', // Specify the model to use
+            }
+        );
+
+        // Check for errors
+        if (error) {
+            throw error;
+        }
+
+        // Return the transcription result
+        res.json({ transcription: result });
+    } catch (error) {
+        console.error('Error during transcription:', error);
+        res.status(500).json({ error: 'Transcription failed', details: error });
+    }
+});
+
+// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });
