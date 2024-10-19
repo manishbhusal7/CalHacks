@@ -84,17 +84,17 @@ export default function MessagesPaneHeader(props: MessagesPaneHeaderProps) {
         >
           Call
         </Button>
-        <Button
+        {/* <Button
           color="neutral"
           variant="outlined"
           size="sm"
           sx={{ display: { xs: 'none', md: 'inline-flex' } }}
         >
           View profile
-        </Button>
-        <IconButton size="sm" variant="plain" color="neutral">
+        </Button> */}
+        {/* <IconButton size="sm" variant="plain" color="neutral">
           <MoreVertRoundedIcon />
-        </IconButton>
+        </IconButton> */}
       </Stack>
     </Stack>
   );
