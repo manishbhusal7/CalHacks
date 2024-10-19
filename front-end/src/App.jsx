@@ -1,15 +1,15 @@
 // import { useState } from 'react'
-import JoyMessagesTemplate from './messages/JoyMessagesTemplate'
-import './App.css'
+import JoyMessagesTemplate from "./messages/JoyMessagesTemplate.tsx";
+import "./App.css";
 
 function App() {
-//   const [count, setCount] = useState(0)
+  //   const [count, setCount] = useState(0)
 
   return (
     <>
-        <JoyMessagesTemplate />
+      <JoyMessagesTemplate />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
