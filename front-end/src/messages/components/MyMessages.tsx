@@ -22,7 +22,7 @@ export default function MyProfile() {
         },
       }}
     >
-      <Sheet
+      {/* <Sheet
         sx={{
           position: { xs: 'fixed', sm: 'sticky' },
           transform: {
@@ -40,7 +40,8 @@ export default function MyProfile() {
           selectedChatId={selectedChat.id}
           setSelectedChat={setSelectedChat}
         />
-      </Sheet>
+      </Sheet> */}
+      {/* <MessagesPane chat={selectedChat} /> */}
       <MessagesPane chat={selectedChat} />
     </Sheet>
   );

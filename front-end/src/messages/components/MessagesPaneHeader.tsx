@@ -12,6 +12,7 @@ import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import { UserProps } from '../types';
 import { toggleMessagesPane } from '../utils';
 
+import ColorSchemeToggle from './ColorSchemeToggle';
 type MessagesPaneHeaderProps = {
   sender: UserProps;
 };
@@ -46,6 +47,7 @@ export default function MessagesPaneHeader(props: MessagesPaneHeaderProps) {
         </IconButton>
         <Avatar size="lg" src={sender.avatar} />
         <div>
+        <ColorSchemeToggle sx={{ ml: 'auto' }} />
           <Typography
             component="h2"
             noWrap
@@ -69,7 +71,7 @@ export default function MessagesPaneHeader(props: MessagesPaneHeaderProps) {
           >
             {sender.name}
           </Typography>
-          <Typography level="body-sm">{sender.username}</Typography>
+          {/* <Typography level="body-sm">{sender.username}</Typography> */}
         </div>
       </Stack>
       <Stack spacing={1} direction="row" sx={{ alignItems: 'center' }}>
