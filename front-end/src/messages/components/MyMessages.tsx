@@ -3,8 +3,10 @@ import Sheet from '@mui/joy/Sheet';
 
 import MessagesPane from './MessagesPane';
 import ChatsPane from './ChatsPane';
-import { ChatProps } from '../types';
-import { chats } from '../data';
+import { chats } from '../../chats';
+import { ChatProps, UserProps } from '../types';
+
+
 
 export default function MyProfile() {
   const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0]);

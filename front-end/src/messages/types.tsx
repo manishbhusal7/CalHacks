@@ -10,7 +10,7 @@ export type MessageProps = {
   content: string;
   timestamp: string;
   unread?: boolean;
-  sender: UserProps | 'You';
+  sender: UserProps | String;
   attachment?: {
     fileName: string;
     type: string;

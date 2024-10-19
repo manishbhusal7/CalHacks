@@ -21,10 +21,10 @@ export default function MessageInput(props: MessageInputProps) {
   const { textAreaValue, setTextAreaValue, onSubmit } = props;
   const textAreaRef = React.useRef<HTMLDivElement>(null);
   const handleClick = () => {
-    if (textAreaValue.trim() !== '') {
+    // if (textAreaValue.trim() !== '') {
       onSubmit();
-      setTextAreaValue('');
-    }
+    //   setTextAreaValue('');
+    // }
   };
   return (
     <Box sx={{ px: 2, pb: 3 }}>
