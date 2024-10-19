@@ -100,7 +100,8 @@ export default function MessagesPane(props: MessagesPaneProps) {
         }}
       >
         <Stack spacing={2} sx={{ justifyContent: "flex-end" }}>
-          {chatMessages.map((message: MessageProps, index: number) => {
+          {chatMessages.map((message , index: number) => {
+            message = message as MessageProps;
             const isYou = message.sender === "You";
             return (
               <Stack
