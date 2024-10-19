@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useEffect, useState, useReducer, useRef } from "react";
 import { Reload, Rocket, Stop } from "../assets";
 import { Chat, New } from "../components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -7,8 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { addList, emptyAllRes, insertNew, livePrompt } from "../redux/messages";
 import { emptyUser } from "../redux/user";
 import instance from "../config/instance";
-import "./style.scss";
+import RecordRTC from 'recordrtc';
 
+import "./style.scss";
+import AudioRecorder from "./AudioRecorder";
 const reducer = (state, { type, status }) => {
   switch (type) {
     case "chat":
@@ -174,6 +176,7 @@ const InputArea = ({ status, chatRef, stateAction }) => {
 
   return (
     <div className="inputArea">
+      <AudioRecorder/>
       {!status.error ? (
         <>
           <div className="chatActionsLg">
