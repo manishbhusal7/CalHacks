@@ -113,6 +113,7 @@ export default Main;
 //Input Area
 const InputArea = ({ status, chatRef, stateAction }) => {
   let textAreaRef = useRef();
+  const [text, setText] = useState("");
 
   const [chatHistory, setChatHistory] = useState([]);
   const [userInput, setUserInput] = useState('');
@@ -141,8 +142,6 @@ const InputArea = ({ status, chatRef, stateAction }) => {
       chatRef?.current?.clearResponse();
 
       let res = null;
-
-    console.log("DSFSDF");
     // if (!userInput.trim()) return;
    
     stateAction({ type: "chat", status: true });
@@ -176,37 +175,59 @@ const InputArea = ({ status, chatRef, stateAction }) => {
         dispatch(insertNew({messaeQ, fullContent: content, chatsId }));
         chatRef?.current?.loadResponse(stateAction, content, chatsId);
         stateAction({ type: "error", status: false });
+        fetchAudio(content);
       }
     }
+    dispatch(livePrompt(""));
 
     setUserInput("");
     }
   };
-  const handleSubmit = async () => {
-    console.log("DSFSDF");
-    if (!userInput.trim()) return;
-   
-    stateAction({ type: "chat", status: true });
-    const userMessage = { role: "user", content: userInput };
-    setChatHistory((prevHistory) => [...prevHistory, userMessage]);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const audioRef = useRef(null); // Reference for the audio element
 
+  const fetchAudio = async (content) => {
     try {
-      const response = await axios.post('http://localhost:3001/chat', {
-        messages: [...chatHistory, userMessage]
+      const textToSend = "Hello, how can I help you today?"; // Example text
+
+      // Send a POST request to the backend with the text to generate audio
+      const response = await fetch("http://localhost:3001/generate-audio", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: content }), // Send the text as JSON
       });
-      console.log(response.data.response);
 
+      if (!response.ok) {
+        throw new Error('Failed to fetch audio');
+      }
+
+      console.log(response);
       
-      const assistantMessage = { role: "assistant", content: response.data.response };
-      setChatHistory((prevHistory) => [...prevHistory, assistantMessage]);
-      chatRef?.current?.loadResponse(stateAction, response.data.response, "chatsId");
-    } catch (error) {
-      console.error('Error fetching chat response:', error);
-      const errorMessage = { role: "assistant", content: "Sorry, I couldn't get a response." };
-      setChatHistory((prevHistory) => [...prevHistory, errorMessage]);
-    }
 
-    setUserInput("");
+      const reader = response.body.getReader();
+        const chunks = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+
+        // Combine the chunks into a single Uint8Array
+        const audioBuffer = new Uint8Array(chunks.reduce((acc, chunk) => acc.concat(Array.from(chunk)), []));
+
+        // Create a Blob from the buffer and generate an audio URL
+        const blob = new Blob([audioBuffer], { type: 'audio/m4a' });
+        const audioUrl = URL.createObjectURL(blob);
+
+        // Create an Audio object and play the audio programmatically
+        const audio = new Audio(audioUrl);
+        await audio.play();
+    } catch (error) {
+      console.error("Error fetching audio:", error);
+    }
   };
 
   return (
