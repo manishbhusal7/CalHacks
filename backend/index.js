@@ -11,12 +11,13 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
-const GROQ_API_KEY="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";
+const GROQ_API_KEY = "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";
 const groq = new Groq({
-  apiKey: GROQ_API_KEY, // Make sure to set this environment variable
+  apiKey: GROQ_API_KEY,
 });
 
 app.use(cors());
+app.use(express.json());
 
 app.post('/upload', upload.single('audio'), async (req, res) => {
   if (!req.file) {
@@ -24,11 +25,9 @@ app.post('/upload', upload.single('audio'), async (req, res) => {
   }
 
   try {
-    // Rename the file to have .mp3 extension
     const newPath = `${req.file.path}.mp3`;
     fs.renameSync(req.file.path, newPath);
 
-    // Create a translation job
     const translation = await groq.audio.translations.create({
       file: fs.createReadStream(newPath),
       model: "whisper-large-v3",
@@ -36,13 +35,39 @@ app.post('/upload', upload.single('audio'), async (req, res) => {
       temperature: 0.0,
     });
 
-    // Delete the file after processing
     fs.unlinkSync(newPath);
 
     res.json({ transcription: translation.text });
   } catch (error) {
     console.error('Error processing audio:', error);
     res.status(500).send('Error processing audio');
+  }
+});
+
+app.post('/chat', async (req, res) => {
+  const { messages } = req.body;
+
+  console.log(messages);
+  
+
+  try {
+    const response = await groq.chat.completions.create({
+      model: "llama3-70b-8192",
+      messages: [
+        {
+          role: "system",
+          content: 'You are a medical chatbot. Tell the user what to do based on their questions. You only give advice for medical response. Any irrelevant question should be responded with "Sorry, this does not seem like a medical question."'
+        },
+        ...messages
+      ],
+      max_tokens: 100,
+      temperature: 1.2,
+    });
+
+    res.json({ response: response.choices[0].message.content });
+  } catch (error) {
+    console.error('Error fetching chat response:', error);
+    res.status(500).json({ error: "Sorry, I couldn't get a response." });
   }
 });
 
