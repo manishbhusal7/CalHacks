@@ -1,0 +1,2 @@
+__version__ = '2.5.0+cpu'
+git_version = '56bc006d56a0d4960de6a1e0b6340cba4eda05cd'
