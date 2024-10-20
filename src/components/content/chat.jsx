@@ -9,7 +9,6 @@ import { insertNew } from '../../redux/messages'
 import './style.scss'
 
 const Chat = forwardRef(({ error }, ref) => {
-
   const dispatch = useDispatch()
 
   const contentRef = useRef()

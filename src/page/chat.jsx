@@ -7,8 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addList, emptyAllRes, insertNew, livePrompt } from "../redux/messages";
 import { emptyUser } from "../redux/user";
 import instance from "../config/instance";
-import RecordRTC from 'recordrtc';
-
+import axios from 'axios';
 import "./style.scss";
 import AudioRecorder from "./AudioRecorder";
 const reducer = (state, { type, status }) => {
@@ -115,6 +114,9 @@ export default Main;
 const InputArea = ({ status, chatRef, stateAction }) => {
   let textAreaRef = useRef();
 
+  const [chatHistory, setChatHistory] = useState([]);
+  const [userInput, setUserInput] = useState('');
+
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -140,49 +142,87 @@ const InputArea = ({ status, chatRef, stateAction }) => {
 
       let res = null;
 
-      try {
-        if (_id) {
-          res = await instance.put("/api/chat", {
-            chatId: _id,
-            prompt,
-          });
-        } else {
-          res = await instance.post("/api/chat", {
-            prompt,
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        if (err?.response?.data?.status === 405) {
-          dispatch(emptyUser());
-          dispatch(emptyAllRes());
-          navigate("/login");
-        } else {
-          stateAction({ type: "error", status: true });
-        }
-      } finally {
-        if (res?.data) {
-          const { _id, content } = res?.data?.data;
+    console.log("DSFSDF");
+    // if (!userInput.trim()) return;
+   
+    stateAction({ type: "chat", status: true });
+    const userMessage = { role: "user", content: prompt };
+    setChatHistory((prevHistory) => [...prevHistory, userMessage]);
 
-          dispatch(insertNew({ _id, fullContent: content, chatsId }));
+    try {
+      res = await axios.post('http://localhost:3001/chat', {
+        messages: [...chatHistory, userMessage]
+      });
+      console.log(res.data.response);
+      const assistantMessage = { role: "assistant", content: res.data.response };
+      setChatHistory((prevHistory) => [...prevHistory, assistantMessage]);
+    } catch (error) {
+      console.error('Error fetching chat response:', error);
+      const errorMessage = { role: "assistant", content: "Sorry, I couldn't get a response." };
+      setChatHistory((prevHistory) => [...prevHistory, errorMessage]);
+      console.log(err);
+      if (err?.response?.data?.status === 405) {
+        dispatch(emptyUser());
+        dispatch(emptyAllRes());
+      } else {
+        stateAction({ type: "error", status: true });
+      }
+    } finally {
+      if (res?.data) {
 
-          chatRef?.current?.loadResponse(stateAction, content, chatsId);
-
-          stateAction({ type: "error", status: false });
-        }
+        const  content = res?.data?.response;
+        console.log(content);
+        const messaeQ = "SDSDFDSfsdf"
+        dispatch(insertNew({messaeQ, fullContent: content, chatsId }));
+        chatRef?.current?.loadResponse(stateAction, content, chatsId);
+        stateAction({ type: "error", status: false });
       }
     }
+
+    setUserInput("");
+    }
+  };
+  const handleSubmit = async () => {
+    console.log("DSFSDF");
+    if (!userInput.trim()) return;
+   
+    stateAction({ type: "chat", status: true });
+    const userMessage = { role: "user", content: userInput };
+    setChatHistory((prevHistory) => [...prevHistory, userMessage]);
+
+    try {
+      const response = await axios.post('http://localhost:3001/chat', {
+        messages: [...chatHistory, userMessage]
+      });
+      console.log(response.data.response);
+
+      
+      const assistantMessage = { role: "assistant", content: response.data.response };
+      setChatHistory((prevHistory) => [...prevHistory, assistantMessage]);
+      chatRef?.current?.loadResponse(stateAction, response.data.response, "chatsId");
+    } catch (error) {
+      console.error('Error fetching chat response:', error);
+      const errorMessage = { role: "assistant", content: "Sorry, I couldn't get a response." };
+      setChatHistory((prevHistory) => [...prevHistory, errorMessage]);
+    }
+
+    setUserInput("");
   };
 
   return (
     <div className="inputArea">
-      <AudioRecorder/>
+ 
       {!status.error ? (
         <>
+        <div style={{position:"absolute", background:"transparent", display:"flex", marginLeft:"550px", marginTop:"-40px"}}>
+        <AudioRecorder />
+        </div>
           <div className="chatActionsLg">
             {status.chat && content?.length > 0 && status.actionBtns && (
               <>
+              
                 {!status?.resume ? (
+                               
                   <button
                     onClick={() => {
                       chatRef.current.loadResponse(stateAction);
@@ -210,6 +250,7 @@ const InputArea = ({ status, chatRef, stateAction }) => {
                 ref={textAreaRef}
                 value={prompt}
                 onChange={(e) => {
+                  setUserInput(e.target.value);
                   dispatch(livePrompt(e.target.value));
                 }}
               />

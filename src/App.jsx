@@ -46,8 +46,8 @@ const App = () => {
   });
 
   return (
-    <section className={user ? "main-grid" : null}>
-      {user && (
+    <section className={true ? "main-grid" : null}>
+      {true && (
         <div>
           <Menu changeColorMode={changeColorMode} />
         </div>
