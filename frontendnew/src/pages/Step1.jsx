@@ -1,11 +1,9 @@
 import { useState } from "react";
-// import axios from "axios";
 import { useNavigate } from "react-router-dom"; // For navigation to Step2
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone, faDove } from "@fortawesome/free-solid-svg-icons";
 import { createChatCompletion, translateAudio } from "../api";
 import RecordButton from "../components/RecordAudioBtn";
-import * as pdfjsLib from "pdfjs-dist";
 import { useTTS } from '@cartesia/cartesia-js/react';
 
 
@@ -146,30 +144,6 @@ function Step1() {
           <FontAwesomeIcon icon={faDove} className="ml-2" />
         </h1>
 
-        {/* Instructions */}
-        {/* <div className="w-3/4 p-4 mx-2 bg-white rounded-lg shadow-lg">
-          {showInstructions && (
-            <div>
-              <p className="mt-5 mb-2 mx-2 text-gray-900 text-base text-center font-bold">
-                Get case recommendations tailored to your client’s situation. To
-                do so:
-              </p>
-              <p className="mb-2 mx-2 text-gray-600 text-sm text-center font-normal">
-                - Upload meeting notes directly if you have them saved.
-              </p>
-              <p className="mb-2 mx-2 text-gray-600 text-sm text-center">
-                - Or describe your client’s facts in the chat box — type key
-                details, issues, or case background.
-              </p>
-              <p className="mb-5 mx-2 text-gray-900 text-base text-center font-bold">
-                Once submitted, we’ll analyze the input and scan millions of
-                cases across various jurisdictions to show relevant cases ranked
-                by similarity.
-              </p>
-            </div>
-          )}
-        </div> */}
-
         <div className="h-8 bg-gray-200"></div>
 
         {/* Chat Section */}
@@ -234,12 +208,6 @@ function Step1() {
               placeholder="Type your message..."
               className="flex-grow p-2 bg-white text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            {/* <button 
-            className="px-4 py-2 text-white bg-blue-900 focus:bg-blue-600 rounded-full hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            // onClick={}
-            >
-            <FontAwesomeIcon icon={faMicrophone} />
-            </button> */}
             <RecordButton
               getAudioCb={handleAudioTranslate}
               onClick={()=>{console.log("clicked"); setIsRecording(!isRecording)}}
@@ -250,11 +218,6 @@ function Step1() {
               {/* <span className="animate-bounce absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span> */}
               <FontAwesomeIcon className="" icon={faMicrophone} />
             </RecordButton>
-            {/* <TextToSpeech /> */}
-            {/* <span className="relative absolute h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-              </span> */}
             <button
               onClick={handleSubmit}
               className="px-4 py-2 text-white bg-blue-900 focus:bg-blue-600 rounded-md hover:bg-blue-500 focus:outline-none  focus:ring-2 focus:ring-blue-500"
