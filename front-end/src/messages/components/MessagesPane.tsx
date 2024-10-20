@@ -9,12 +9,39 @@ import MessagesPaneHeader from "./MessagesPaneHeader";
 import { ChatProps, MessageProps } from "../types";
 import { useState } from "react";
 import fetchApiData from "../../api";
+import * as React from "react";
+import Box from "@mui/joy/Box";
+import Sheet from "@mui/joy/Sheet";
+import Stack from "@mui/joy/Stack";
+import AvatarWithStatus from "./AvatarWithStatus";
+import ChatBubble from "./ChatBubble";
+import MessageInput from "./MessageInput";
+import MessagesPaneHeader from "./MessagesPaneHeader";
+import { ChatProps, MessageProps } from "../types";
+import { useState } from "react";
+import fetchApiData from "../../api";
 
 type MessagesPaneProps = {
+  chat: ChatProps;
   chat: ChatProps;
 };
 
 export default function MessagesPane(props: MessagesPaneProps) {
+  const { chat } = props;
+
+  // Initialize chat history with system prompt
+  const systemPrompt = {
+    role: "system",
+    content:
+      "You are a medical chatbot. You only give advice for medical response. Any irrelevant question should be responded with 'Sorry, this does not seem like a medical question.'",
+  };
+
+  const [chatMessages, setChatMessages] = useState([
+    systemPrompt,
+    ...chat.messages,
+  ]);
+  const [textAreaValue, setTextAreaValue] = useState("");
+  const [apiData, setApiData] = useState(null);
   const { chat } = props;
 
   // Initialize chat history with system prompt
@@ -46,10 +73,50 @@ export default function MessagesPane(props: MessagesPaneProps) {
       content: textAreaValue,
       timestamp: "Just now",
     };
+    // Handle form submission
+    const onSubmit = async () => {
+      if (!textAreaValue.trim()) return; // Prevent empty submissions
 
-    const updatedChatMessages = [...chatMessages, userMessage];
-    setChatMessages(updatedChatMessages);
+      const newId = chatMessages.length + 1;
+      const newIdString = newId.toString();
 
+      // Add the user's message to the chat history
+      const userMessage = {
+        id: newIdString,
+        role: "user",
+        sender: "You",
+        content: textAreaValue,
+        timestamp: "Just now",
+      };
+
+      const updatedChatMessages = [...chatMessages, userMessage];
+      setChatMessages(updatedChatMessages);
+      const updatedChatMessages = [...chatMessages, userMessage];
+      setChatMessages(updatedChatMessages);
+
+      try {
+        // Fetch the chatbot's response from the API
+        const data = await fetchApiData(updatedChatMessages);
+        setApiData(data);
+
+        // Extract the chatbot's response message
+        const botMessage = {
+          id: (updatedChatMessages.length + 1).toString(),
+          role: "assistant",
+          sender: "bot",
+          content: data.choices[0].message.content,
+          timestamp: "Just now",
+        };
+
+        // Add the chatbot's response to the chat
+        setChatMessages([...updatedChatMessages, botMessage]);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+
+      // Clear the input field after submission
+      setTextAreaValue("");
+    };
     try {
       // Fetch the chatbot's response from the API
       const data = await fetchApiData(updatedChatMessages);
@@ -77,6 +144,9 @@ export default function MessagesPane(props: MessagesPaneProps) {
   React.useEffect(() => {
     setChatMessages([systemPrompt, ...chat.messages]);
   }, [chat.messages]);
+  React.useEffect(() => {
+    setChatMessages([systemPrompt, ...chat.messages]);
+  }, [chat.messages]);
 
   return (
     <Sheet
@@ -100,7 +170,7 @@ export default function MessagesPane(props: MessagesPaneProps) {
         }}
       >
         <Stack spacing={2} sx={{ justifyContent: "flex-end" }}>
-          {chatMessages.map((message , index: number) => {
+          {chatMessages.map((message, index: number) => {
             message = message as MessageProps;
             const isYou = message.sender === "You";
             return (
