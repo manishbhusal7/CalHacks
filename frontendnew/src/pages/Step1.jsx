@@ -50,43 +50,45 @@ try {
 // 	console.log("Received message:", message);
 // }
 
-function TextToSpeech() {
-	const tts = useTTS({
-		apiKey: "e43cbd2f-c25d-4eea-afeb-d6ce7264d19e",
-		sampleRate: 44100,
-	})
+// function TextToSpeech() {
+// 	const tts = useTTS({
+// 		apiKey: "e43cbd2f-c25d-4eea-afeb-d6ce7264d19e",
+// 		sampleRate: 44100,
+// 	})
 
-	const [text, setText] = useState("");
+// 	const [text, setText] = useState("");
 
-	const handlePlay = async () => {
-		// Begin buffering the audio.
-		const response = await tts.buffer({
-			model_id: "sonic-english",
-			voice: {
-        		mode: "id",
-        		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
-        	},
-			transcript: text,
-		});
+// 	const handlePlay = async (au) => {
+// 		// Begin buffering the audio.
+// 		const response = await tts.buffer({
+// 			model_id: "sonic-english",
+// 			voice: {
+//         		mode: "id",
+//         		id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+//         	},
+// 			transcript: text,
+// 		});
 
-		// Immediately play the audio. (You can also buffer in advance and play later.)
-		await tts.play();
-	}
+// 		// Immediately play the audio. (You can also buffer in advance and play later.)
+// 		await tts.play();
+// 	}
 
-	return (
-		<div>
-			<input type="text" value={text} onChange={(event) => setText(event.target.value)} />
-			<button onClick={handlePlay}>Play</button>
+// 	return (
+// 		<div>
+// 			<input type="text" value={text} onChange={(event) => setText(event.target.value)} />
+// 			<button onClick={handlePlay}>Play</button>
 
-			<div>
-				{tts.playbackStatus} | {tts.bufferStatus} | {tts.isWaiting}
-			</div>
-		</div>
-	);
-}
+// 			<div>
+// 				{tts.playbackStatus} | {tts.bufferStatus} | {tts.isWaiting}
+// 			</div>
+// 		</div>
+// 	);
+// }
+
 
 
 function Step1() {
+
   // State for chat messages
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hi! How can I provide help for you today?" },
@@ -135,6 +137,26 @@ function Step1() {
     }
   };
 
+	const tts = useTTS({
+		apiKey: "e43cbd2f-c25d-4eea-afeb-d6ce7264d19e",
+		sampleRate: 44100,
+	})
+
+    const speakAloud = async (text) => {
+        // Begin buffering the audio.
+        const response = await tts.buffer({
+            model_id: "sonic-english",
+            voice: {
+                mode: "id",
+                id: "a0e99841-438c-4a64-b679-ae501e7d6091",
+            },
+            transcript: text,
+        });
+
+        // Immediately play the audio. (You can also buffer in advance and play later.)
+        await tts.play();
+    }
+
   const handleSubmit = async () => {
     if (input.trim() === "" && !file) return; // Ensure there's an input or file before submitting
     const userMessage = { role: "user", content: input };
@@ -144,6 +166,7 @@ function Step1() {
     // Append assistant response to chat history
     const assistantMessage = { role: "assistant", content: response };
     setMessages((prevHistory) => [...prevHistory, assistantMessage]);
+    speakAloud(response);
   };
 
   const handleAudioTranslate = async (audioBlob) => {
@@ -155,15 +178,6 @@ function Step1() {
     } catch (error) {
       console.error("Error processing audio:", error);
     }
-    // const userMessage = { role: "user", content: userInput };
-    // setChatHistory((prevHistory) => [...prevHistory, userMessage]);
-
-    // // Call the API to get the assistant's response
-    // const response = await createChatCompletion([...chatHistory, userMessage]);
-
-    // // Append assistant response to chat history
-    // const assistantMessage = { role: "assistant", content: response };
-    // setChatHistory((prevHistory) => [...prevHistory, assistantMessage]);
   };
 
   const navigateToNotes = () => {
@@ -314,7 +328,7 @@ function Step1() {
               {/* <span className="animate-bounce absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span> */}
               <FontAwesomeIcon className="" icon={faMicrophone} />
             </RecordButton>
-            <TextToSpeech />
+            {/* <TextToSpeech /> */}
             {/* <span className="relative absolute h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
