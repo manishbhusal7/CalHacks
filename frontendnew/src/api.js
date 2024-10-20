@@ -38,6 +38,25 @@ export const createChatCompletion = async (chatHistory) => {
     }
   };
 
+  export const geminiGetSummary = async (formData) => {
+    // Replace with your backend URL
+    const response = await fetch('http://localhost:5000/summarize', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to upload file'); // Handle non-2xx responses
+    }
+
+    const data = await response.json();
+    if (data.error) {
+        throw new Error(data.error); // Check for errors in the response
+    }
+    return data;
+
+}
+
 export async function transcribeAudio(audioBlob) {
   try {
     const formData = new FormData();
